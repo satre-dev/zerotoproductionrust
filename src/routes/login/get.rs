@@ -51,6 +51,7 @@ pub struct QueryParams {
     tag: String,
 }
 
+#[allow(dead_code)]
 impl QueryParams {
     fn verify(self, secret: &HmacSecret) -> Result<String, anyhow::Error> {
         let tag = hex::decode(self.tag)?;
