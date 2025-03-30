@@ -70,12 +70,12 @@ struct SendEmailRequest<'a> {
 #[cfg(test)]
 mod tests {
     use claims::{assert_err, assert_ok};
-    use fake::{Fake, Faker};
     use fake::faker::internet::en::SafeEmail;
     use fake::faker::lorem::en::{Paragraph, Sentence};
+    use fake::{Fake, Faker};
     use secrecy::Secret;
-    use wiremock::{Mock, MockServer, Request, ResponseTemplate};
     use wiremock::matchers::{any, header, header_exists, method, path};
+    use wiremock::{Mock, MockServer, Request, ResponseTemplate};
 
     use crate::domain::SubscriberEmail;
     use crate::email_client::EmailClient;

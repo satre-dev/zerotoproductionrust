@@ -1,7 +1,7 @@
 use std::fmt::Formatter;
 
-use actix_web::{HttpResponse, ResponseError, web};
 use actix_web::http::StatusCode;
+use actix_web::{web, HttpResponse, ResponseError};
 use sqlx::PgPool;
 use uuid::Uuid;
 

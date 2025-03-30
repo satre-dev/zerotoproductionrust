@@ -28,8 +28,8 @@ impl std::fmt::Display for SubscriberEmail {
 #[cfg(test)]
 mod tests {
     use claims::assert_err;
-    use fake::Fake;
     use fake::faker::internet::en::SafeEmail;
+    use fake::Fake;
 
     use super::SubscriberEmail;
 

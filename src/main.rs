@@ -4,7 +4,7 @@ use zerotoproduction::{
 };
 
 #[tokio::main]
-async fn main() -> Result<(), std::io::Error> {
+async fn main() -> Result<(), anyhow::Error> {
     let subscriber = get_subscriber("zerotoproduction".into(), "info".into(), std::io::stdout);
     init_subscriber(subscriber);
 

@@ -5,7 +5,7 @@ async fn an_error_flash_message_is_set_on_failure() {
     // Arrange
     let app = spawn_app().await;
 
-    // Act - Part 1 - Try to login
+    // Act - Part 1 - Try to log in
     let login_body = serde_json::json!({
         "username": "random-username",
         "password": "random-password"

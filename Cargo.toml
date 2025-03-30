@@ -12,49 +12,38 @@ path = "src/main.rs"
 name = "zerotoproduction"
 
 [dependencies]
-base64 = "0.21"
-thiserror = "1"
-anyhow = "1"
-unicode-segmentation = "1"
 actix-web = "4"
-config = "0.13"
-validator = "0.16"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
-serde = { version = "1", features = ["derive"] }
-serde-aux = "4"
-uuid = { version = "1", features = ["v4"] }
+serde = "1.0.115"
+config = { version = "0.13", default-features = false, features = ["yaml"] }
+sqlx = { version = "0.6.2", default-features = false, features = ["runtime-tokio-rustls", "macros", "postgres", "uuid", "chrono", "migrate"] }
+uuid = { version = "1", features = ["v4", "serde"] }
 chrono = { version = "0.4.22", default-features = false, features = ["clock"] }
-env_logger = "0.9"
+reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls", "cookies"] }
 log = "0.4"
-tracing = { version = "0.1", features = ["log"] }
-tracing-actix-web = "0.7"
+tracing = "0.1.19"
 tracing-subscriber = { version = "0.3", features = ["registry", "env-filter"] }
 tracing-bunyan-formatter = "0.3"
-tracing-log = "0.1"
-once_cell = "1"
-secrecy = { version = "0.8", features = ["serde"] }
+tracing-log = "0.1.1"
+thiserror = "1.0.24"
+serde-aux = "4"
+unicode-segmentation = "1.7.1"
 rand = { version = "0.8", features = ["std_rng"] }
+anyhow = "1.0.40"
+base64 = "0.21.0"
 argon2 = { version = "0.4", features = ["std"] }
-sha3 = "0.9"
-sqlx = { version = "0.6.2", features = [
-    "runtime-tokio-rustls",
-    "chrono",
-    "postgres",
-    "uuid",
-    "macros",
-    "offline",
-] }
-urlencoding = "2"
-htmlescape = "0.3"
+validator = "0.16"
+tracing-actix-web = "0.7"
+secrecy = { version = "0.8", features = ["serde"] }
+actix-web-flash-messages = { version = "0.4", features = ["cookies"] }
+actix-session = { version = "0.7", features = ["redis-rs-tls-session"] }
+serde_json = "1"
+actix-web-lab = "0.18"
 hmac = { version = "0.12", features = ["std"] }
 sha2 = "0.10"
 hex = "0.4"
-actix-web-flash-messages = { version = "0.4", features = ["cookies"] }
-
-[dependencies.reqwest]
-version = "0.11"
-default-features = false
-features = ["json", "rustls-tls", "cookies"]
+urlencoding = "2"
+once_cell = "1"
 
 [dev-dependencies]
 claims = "0.7"
