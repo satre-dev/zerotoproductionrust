@@ -147,10 +147,10 @@ async fn subscribe_fails_if_there_is_a_fatal_database_error() {
         .execute(&app.db_pool)
         .await
         .unwrap();
-    
+
     // Act
     let response = app.post_subscriptions(body.into()).await;
-    
+
     // Assert
     assert_eq!(response.status().as_u16(), 500);
 }
