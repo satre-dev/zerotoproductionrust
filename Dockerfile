@@ -14,7 +14,7 @@ COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 # Dependency tree should be the same at this stage
 COPY . .
-ENV SQLX_OFFLINE true
+ENV SQLX_OFFLINE=true
 RUN cargo build --release --bin zerotoproduction
 
 # Runtime stage
@@ -29,5 +29,5 @@ RUN apt-get update -y \
 
 COPY --from=builder /app/target/release/zerotoproduction zero2prod
 COPY configuration configuration
-ENV APP_ENVIRONMENT production
+ENV APP_ENVIRONMENT=production
 ENTRYPOINT ["./zero2prod"]

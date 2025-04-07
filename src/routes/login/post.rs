@@ -1,16 +1,13 @@
-use std::fmt::Formatter;
-
+use crate::authentication::AuthError;
+use crate::authentication::{validate_credentials, Credentials};
+use crate::routes::error_chain_fmt;
+use crate::session_state::TypedSession;
 use actix_web::error::InternalError;
 use actix_web::http::header::LOCATION;
 use actix_web::{web, HttpResponse};
 use actix_web_flash_messages::FlashMessage;
-use log::error;
 use secrecy::Secret;
 use sqlx::PgPool;
-
-use crate::authentication::{validate_credentials, AuthError, Credentials};
-use crate::routes::error_chain_fmt;
-use crate::session_state::TypedSession;
 
 #[derive(serde::Deserialize)]
 pub struct FormData {
@@ -53,6 +50,14 @@ pub async fn login(
     }
 }
 
+fn login_redirect(e: LoginError) -> InternalError<LoginError> {
+    FlashMessage::error(e.to_string()).send();
+    let response = HttpResponse::SeeOther()
+        .insert_header((LOCATION, "/login"))
+        .finish();
+    InternalError::from_response(e, response)
+}
+
 #[derive(thiserror::Error)]
 pub enum LoginError {
     #[error("Authentication failed")]
@@ -62,15 +67,7 @@ pub enum LoginError {
 }
 
 impl std::fmt::Debug for LoginError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         error_chain_fmt(self, f)
     }
-}
-
-fn login_redirect(e: LoginError) -> InternalError<LoginError> {
-    FlashMessage::error(e.to_string()).send();
-    let response = HttpResponse::SeeOther()
-        .insert_header((LOCATION, "/login"))
-        .finish();
-    InternalError::from_response(e, response)
 }

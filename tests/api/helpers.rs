@@ -1,6 +1,7 @@
 use argon2::password_hash::SaltString;
 use argon2::{Algorithm, Argon2, Params, PasswordHasher, Version};
-use once_cell::sync::Lazy;
+use secrecy::Secret;
+use std::sync::LazyLock;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use uuid::Uuid;
 use wiremock::MockServer;
@@ -9,17 +10,16 @@ use zerotoproduction::configuration::{get_configuration, DatabaseSettings};
 use zerotoproduction::startup::{get_connection_pool, Application};
 use zerotoproduction::telemetry::{get_subscriber, init_subscriber};
 
-static TRACING: Lazy<()> = Lazy::new(|| {
+static TRACING: LazyLock<()> = LazyLock::new(|| {
     let default_filter_level = "info".to_string();
     let subscriber_name = "test".to_string();
-
     if std::env::var("TEST_LOG").is_ok() {
         let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::stdout);
         init_subscriber(subscriber);
     } else {
         let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::sink);
         init_subscriber(subscriber);
-    }
+    };
 });
 
 /// Confirmation Links embedded in request to the email API
@@ -38,15 +38,16 @@ pub struct TestApp {
 }
 
 impl TestApp {
-    pub async fn get_admin_dashboard(&self) -> String {
+    pub async fn get_admin_dashboard(&self) -> reqwest::Response {
         self.api_client
             .get(format!("{}/admin/dashboard", &self.address))
             .send()
             .await
             .expect("Failed to execute request.")
-            .text()
-            .await
-            .unwrap()
+    }
+
+    pub async fn get_admin_dashboard_html(&self) -> String {
+        self.get_admin_dashboard().await.text().await.unwrap()
     }
 
     pub async fn get_login_html(&self) -> String {
@@ -115,7 +116,7 @@ impl TestApp {
 }
 
 pub async fn spawn_app() -> TestApp {
-    Lazy::force(&TRACING);
+    LazyLock::force(&TRACING);
 
     let email_server = MockServer::start().await;
 
@@ -173,7 +174,6 @@ async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .run(&connection_pool)
         .await
         .expect("Failed to migrate the database");
-
     connection_pool
 }
 
@@ -188,7 +188,8 @@ impl TestUser {
         Self {
             user_id: Uuid::new_v4(),
             username: Uuid::new_v4().to_string(),
-            password: Uuid::new_v4().to_string(),
+            // password: Uuid::new_v4().to_string(),
+            password: "dummypassword".into()
         }
     }
     async fn store(&self, pool: &PgPool) {
@@ -201,6 +202,7 @@ impl TestUser {
         .hash_password(self.password.as_bytes(), &salt)
         .unwrap()
         .to_string();
+        dbg!(&password_hash);
         sqlx::query!(
             "INSERT INTO users (user_id, username, password_hash)\
             VALUES ($1, $2, $3)",
