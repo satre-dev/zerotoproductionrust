@@ -117,25 +117,30 @@ impl TestApp {
 pub async fn spawn_app() -> TestApp {
     LazyLock::force(&TRACING);
 
+    // Launch a mock server to stand in for Postmark's API
     let email_server = MockServer::start().await;
 
+    // Randomise configuration to ensure test isolation
     let configuration = {
-        let mut c = get_configuration().expect("Failed to load configuration.");
+        let mut c = get_configuration().expect("Failed to read configuration.");
+        // Use a different database for each test case
         c.database.database_name = Uuid::new_v4().to_string();
+        // Use a random OS port
         c.application.port = 0;
+        // Use the mock server as email API
         c.email_client.base_url = email_server.uri();
         c
     };
 
+    // Create and migrate the database
     configure_database(&configuration.database).await;
 
+    // Launch the application as a background task
     let application = Application::build(configuration.clone())
         .await
-        .expect("Failed to build application");
+        .expect("Failed to build application.");
     let application_port = application.port();
-
-    let address = format!("http://127.0.0.1:{}", application.port());
-    tokio::spawn(application.run_until_stopped());
+    let _ = tokio::spawn(application.run_until_stopped());
 
     let client = reqwest::Client::builder()
         .redirect(reqwest::redirect::Policy::none())
@@ -144,14 +149,16 @@ pub async fn spawn_app() -> TestApp {
         .unwrap();
 
     let test_app = TestApp {
-        address,
+        address: format!("http://localhost:{}", application_port),
         port: application_port,
         db_pool: get_connection_pool(&configuration.database),
         email_server,
         test_user: TestUser::generate(),
         api_client: client,
     };
+
     test_app.test_user.store(&test_app.db_pool).await;
+
     test_app
 }
 
